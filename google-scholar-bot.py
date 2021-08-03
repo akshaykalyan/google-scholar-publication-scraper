@@ -11,7 +11,7 @@ link = "https://scholar.google.co.in/citations?user=UKrBuMEAAAAJ&hl=en"
 profile = {
     "scholar_name": "",
     "aoi": "",
-    "publications_link":[]
+    "publications_link": []
 }
 
 
@@ -50,11 +50,18 @@ def get_profile(link):
             print(d)
         print(len(pub_links_list))
         param["cstart"] += 100
+
     print(profile)
-        # print(profile)
 
 
-get_profile(link)
+def extract_publication_data(link):
+    link = "https://scholar.google.co.in/citations?view_op=view_citation&hl=en&oe=ASCII&user=UKrBuMEAAAAJ&citation_for_view=UKrBuMEAAAAJ:W7OEmFMy1HYC"
+    r = requests.get(link)
+    data = r.content
+    soup = BeautifulSoup(data, 'html.parser')
+
+
+# get_profile(link)
 
 # Test for all
 
