@@ -9,9 +9,9 @@ MAIN_URL = "https://scholar.google.co.in"
 link = "https://scholar.google.co.in/citations?user=UKrBuMEAAAAJ&hl=en"
 
 profile = {
-    "scholar_name": "",
-    "aoi": "",
-    "publications_link": []
+    "Scholar Name": "",
+    "Area of Intrest": "",
+    "Publications Link": []
 }
 
 
@@ -30,7 +30,7 @@ def get_profile(link):
         soup = BeautifulSoup(data, 'html.parser')
 
         # Scholar Name
-        profile["scholar_name"] = soup.find(
+        profile["Scholar Name"] = soup.find(
             id="gsc_prf_in").text.strip()
 
         # aoi
@@ -38,7 +38,7 @@ def get_profile(link):
         aoi = []
         for i in aoi_a:
             aoi.append(i.text.strip())
-        profile["aoi"] = aoi
+        profile["Area of Intrest"] = aoi
 
         # publications
         pub_t = soup.find(id="gsc_a_b").find_all(class_="gsc_a_t")
@@ -46,7 +46,7 @@ def get_profile(link):
         for pub in pub_t:
             d = urllib.parse.urljoin(MAIN_URL, pub.a["href"].strip())
             pub_links_list.append(d)
-            profile["publications_link"].append(d)
+            profile["Publications Link"].append(d)
             print(d)
         print(len(pub_links_list))
         param["cstart"] += 100
@@ -55,12 +55,31 @@ def get_profile(link):
 
 
 def extract_publication_data(link):
-    link = "https://scholar.google.co.in/citations?view_op=view_citation&hl=en&oe=ASCII&user=UKrBuMEAAAAJ&citation_for_view=UKrBuMEAAAAJ:W7OEmFMy1HYC"
+    pub_data = {
+        "Title": "",
+        "Link": ""
+        ""
+    }
+
     r = requests.get(link)
     data = r.content
     soup = BeautifulSoup(data, 'html.parser')
+    title = soup.find("a", class_="gsc_oci_title_link")
+    pub_data["Title"] = title.text.strip()
+    pub_data["Link"] = title["href"]
+    for x in soup.find(id="gsc_oci_table").find_all(class_="gs_scl"):
+        key = x.find(class_="gsc_oci_field").text.strip()
+        value = ""
+        if key == 'Total citations':
+            value = x.find(class_="gsc_oci_value").find("a").text.strip()
+        else:
+            value = x.find(class_="gsc_oci_value").text.strip()
+        pub_data[key] = value
+    print(pub_data)
 
 
+extract_publication_data(
+    "https://scholar.google.co.in/citations?view_op=view_citation&hl=en&oe=ASCII&user=UKrBuMEAAAAJ&citation_for_view=UKrBuMEAAAAJ:W7OEmFMy1HYC")
 # get_profile(link)
 
 # Test for all
