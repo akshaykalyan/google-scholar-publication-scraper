@@ -11,7 +11,8 @@ link = "https://scholar.google.co.in/citations?user=UKrBuMEAAAAJ&hl=en"
 profile = {
     "Scholar Name": "",
     "Area of Intrest": "",
-    "Publications Link": []
+    "Publications Link": [],
+    "Publications Data": []
 }
 
 
@@ -22,6 +23,21 @@ def get_profile(link):
         "cstart": 0,
         "pagesize": 100
     }
+    r = requests.get(link)
+    data = r.content
+    soup = BeautifulSoup(data, 'html.parser')
+    print(soup)
+    # Scholar Name
+    profile["Scholar Name"] = soup.find(
+        id="gsc_prf_in").text.strip()
+
+    # aoi
+    aoi_a = soup.find(id="gsc_prf_int").find_all('a')
+    aoi = []
+    for i in aoi_a:
+        aoi.append(i.text.strip())
+    profile["Area of Intrest"] = aoi
+
     while(start or len(pub_links_list) != 0):
         start = False
 
@@ -47,18 +63,21 @@ def get_profile(link):
             d = urllib.parse.urljoin(MAIN_URL, pub.a["href"].strip())
             pub_links_list.append(d)
             profile["Publications Link"].append(d)
-            print(d)
-        print(len(pub_links_list))
         param["cstart"] += 100
-
-    print(profile)
+    for link in profile['Publications Link']:
+        try:
+            profile["Publications Data"].append(extract_publication_data(link))
+        except Exception as e:
+            print("An exception occurred: ", e)
+    f = open("demofile2.txt", "w")
+    f.write(str(profile))
+    f.close()
 
 
 def extract_publication_data(link):
     pub_data = {
         "Title": "",
         "Link": ""
-        ""
     }
 
     r = requests.get(link)
@@ -75,12 +94,10 @@ def extract_publication_data(link):
         else:
             value = x.find(class_="gsc_oci_value").text.strip()
         pub_data[key] = value
-    print(pub_data)
+    return pub_data
 
 
-extract_publication_data(
-    "https://scholar.google.co.in/citations?view_op=view_citation&hl=en&oe=ASCII&user=UKrBuMEAAAAJ&citation_for_view=UKrBuMEAAAAJ:W7OEmFMy1HYC")
-# get_profile(link)
+get_profile(link)
 
 # Test for all
 
